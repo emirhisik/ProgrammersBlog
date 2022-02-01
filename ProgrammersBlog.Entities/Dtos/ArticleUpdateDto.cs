@@ -50,9 +50,11 @@ namespace ProgrammersBlog.Entities.Dtos
         [Required(ErrorMessage = "{0} alanı boş geçilmemelidir.")]
         public int CategoryId { get; set; }
         public Category Category { get; set; }
-        [DisplayName("Makale Varlığı")]
+        [DisplayName("Makale Aktifliği")]
         [Required(ErrorMessage = "{0} alanı boş geçilmemelidir.")]
         public bool IsActive { get; set; }
+        [DisplayName("Makale Varlığı")]
+        [Required(ErrorMessage = "{0} alanı boş geçilmemelidir.")]
         public bool IsDeleted { get; set; }
     }
 }
