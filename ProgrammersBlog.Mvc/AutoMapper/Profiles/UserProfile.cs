@@ -8,7 +8,8 @@ namespace ProgrammersBlog.Mvc.AutoMapper.Profiles
     {
         public UserProfile()
         {
-            CreateMap<UserAddDto, User>(); 
+            CreateMap<UserAddDto, User>();
+            CreateMap<User, UserUpdateDto>();
         }
     }
 }
