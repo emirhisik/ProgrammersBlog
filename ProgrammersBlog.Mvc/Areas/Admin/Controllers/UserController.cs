@@ -12,8 +12,8 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using ProgrammersBlog.Mvc.Areas.Admin.Models;
 using Microsoft.AspNetCore.Http;
+using ProgrammersBlog.Mvc.Areas.Admin.Models;
 
 namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
 {
@@ -44,11 +44,11 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
         public async Task<JsonResult> GetAllUsers()
         {
             var users = await _userManager.Users.ToListAsync();
-            var userListDto = JsonSerializer.Serialize(new UserListDto
+            var userListDto =JsonSerializer.Serialize(new UserListDto
             {
                 Users = users,
                 ResultStatus = ResultStatus.Success
-            }, new JsonSerializerOptions
+            },new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.Preserve
             });
@@ -64,7 +64,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                userAddDto.Picture = await ImageUpload(userAddDto);
+                userAddDto.Picture = await ImageUpload(userAddDto.UserName,userAddDto.PictureFile);
                 var user = _mapper.Map<User>(userAddDto);
                 var result = await _userManager.CreateAsync(user, userAddDto.Password);
                 if (result.Succeeded)
@@ -85,7 +85,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                 {
                     foreach (var error in result.Errors)
                     {
-                        ModelState.AddModelError("", error.Description);
+                        ModelState.AddModelError("",error.Description);
                     }
 
                     var userAddAjaxErrorModel = JsonSerializer.Serialize(new UserAddAjaxViewModel
@@ -95,7 +95,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                     });
                     return Json(userAddAjaxErrorModel);
                 }
-
+                
             }
             var userAddAjaxModelStateErrorModel = JsonSerializer.Serialize(new UserAddAjaxViewModel
             {
@@ -139,25 +139,27 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
             }
         }
         [HttpGet]
-        public async Task<PartialViewResult> Update (int userId)
+        public async Task<PartialViewResult> Update(int userId)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var userUpdateDto = _mapper.Map<UserUpdateDto>(user);
             return PartialView("_UserUpdatePartial", userUpdateDto);
         }
+
         [HttpPost]
         public async Task<IActionResult> Update(UserUpdateDto userUpdateDto)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 bool isNewPictureUploaded = false;
                 var oldUser = await _userManager.FindByIdAsync(userUpdateDto.Id.ToString());
                 var oldUserPicture = oldUser.Picture;
-                if (userUpdateDto.PictureFile != null)
+                if (userUpdateDto.PictureFile!=null)
                 {
                     userUpdateDto.Picture = await ImageUpload(userUpdateDto.UserName, userUpdateDto.PictureFile);
                     isNewPictureUploaded = true;
                 }
+
                 var updatedUser = _mapper.Map<UserUpdateDto, User>(userUpdateDto, oldUser);
                 var result = await _userManager.UpdateAsync(updatedUser);
                 if (result.Succeeded)
@@ -166,12 +168,13 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                     {
                         ImageDelete(oldUserPicture);
                     }
+
                     var userUpdateViewModel = JsonSerializer.Serialize(new UserUpdateAjaxViewModel
                     {
                         UserDto = new UserDto
                         {
                             ResultStatus = ResultStatus.Success,
-                            Message = $"{updatedUser.UserName} adlı kullanıcı başarıyla güncellenmiştir",
+                            Message = $"{updatedUser.UserName} adlı kullanıcı başarıyla güncellenmiştir.",
                             User = updatedUser
                         },
                         UserUpdatePartial = await this.RenderViewToStringAsync("_UserUpdatePartial", userUpdateDto)
@@ -180,17 +183,18 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                 }
                 else
                 {
-                    foreach(var error in result.Errors)
+                    foreach (var error in result.Errors)
                     {
-                        ModelState.AddModelError("", error.Description);
+                        ModelState.AddModelError("",error.Description);
                     }
-                    var userUpdateErrorViewModel = JsonSerializer.Serialize(new UserUpdateAjaxViewModel
+                    var userUpdateErorViewModel = JsonSerializer.Serialize(new UserUpdateAjaxViewModel
                     {
                         UserUpdateDto = userUpdateDto,
                         UserUpdatePartial = await this.RenderViewToStringAsync("_UserUpdatePartial", userUpdateDto)
                     });
-                    return Json(userUpdateErrorViewModel);
+                    return Json(userUpdateErorViewModel);
                 }
+
             }
             else
             {
@@ -221,6 +225,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
 
             return fileName; // AlperTunga_587_5_38_12_3_10_2020.png - "~/img/user.Picture"
         }
+
         public bool ImageDelete(string pictureName)
         {
             string wwwroot = _env.WebRootPath;

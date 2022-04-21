@@ -11,5 +11,6 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Models
         public UserUpdateDto UserAddDto { get; set; }
         public string UserUpdatePartial { get; set; }
         public UserDto UserDto { get; set; }
+        public UserUpdateDto UserUpdateDto { get; internal set; }
     }
 }
