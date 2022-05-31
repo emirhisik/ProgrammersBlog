@@ -8,13 +8,20 @@ using ProgrammersBlog.Services.Extensions;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using ProgrammersBlog.Mvc.AutoMapper.Profiles;
+using ProgrammersBlog.Mvc.Helpers.Concrete;
+using ProgrammersBlog.Mvc.Helpers.Abstract;
+using Microsoft.Extensions.Configuration;
 
 namespace ProgrammersBlog.Mvc
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews().AddRazorRuntimeCompilation().AddJsonOptions(opt =>
@@ -24,7 +31,8 @@ namespace ProgrammersBlog.Mvc
             });
             services.AddSession();
             services.AddAutoMapper(typeof(CategoryProfile), typeof(ArticleProfile), typeof(UserProfile));
-            services.LoadMyServices();
+            services.LoadMyServices(Configuration.GetConnectionString("LocalDB"));
+            services.AddScoped<IImageHelper, ImageHelper>();
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = new PathString("/Admin/User/Login");
