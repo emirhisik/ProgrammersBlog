@@ -10,23 +10,22 @@ using AutoMapper;
 using ProgrammersBlog.Mvc.Helpers.Abstract;
 using ProgrammersBlog.Entities.Dtos;
 using ProgrammersBlog.Entities.ComplexTypes;
+using ProgrammersBlog.Entities.Concrete;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ArticleController : Controller
+    public class ArticleController : BaseController
     {
         private readonly IArticleService _articleService;
         private readonly ICategoryService _categoryService;
-        private readonly IMapper _mapper;
-        private readonly IImageHelper _imageHelper;
 
-        public ArticleController(IArticleService articleService, ICategoryService categoryService, IMapper mapper, IImageHelper imageHelper)
+        public ArticleController(IArticleService articleService, ICategoryService categoryService,UserManager<User> userManager, IMapper mapper, IImageHelper imageHelper):base(userManager, mapper, imageHelper)
         {
             _articleService = articleService;
             _categoryService = categoryService;
-            _mapper = mapper;
-            _imageHelper = imageHelper;
         }
 
         [HttpGet]
@@ -39,7 +38,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            var result = await _categoryService.GetAllByNonDeletedAsync();
+            var result = await _categoryService.GetAllByNonDeletedAndActiveAsync();
             if (result.ResultStatus == ResultStatus.Success)
             {
                 return View(new ArticleAddViewModel
@@ -55,10 +54,10 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                var articleAddDto = _mapper.Map<ArticleAddDto>(articleAddViewModel);
-                var imageResult = await _imageHelper.Upload(articleAddViewModel.Title, articleAddViewModel.ThumbnailFile, PictureType.Post);
+                var articleAddDto = Mapper.Map<ArticleAddDto>(articleAddViewModel);
+                var imageResult = await ImageHelper.Upload(articleAddViewModel.Title, articleAddViewModel.ThumbnailFile, PictureType.Post);
                 articleAddDto.Thumbnail = imageResult.Data.FullName;
-                var result = await _articleService.AddAsync(articleAddDto, "Emir Işık");
+                var result = await _articleService.AddAsync(articleAddDto, LoggedInUser.UserName);
                 if (result.ResultStatus == ResultStatus.Success)
                 {
                     TempData.Add("SuccessMessage", result.Message);
@@ -71,6 +70,22 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                 }
             }
             return View(articleAddViewModel);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Update(int articleId)
+        {
+            var articleResult = await _articleService.GetArticleUpdateDtoAsync(articleId);
+            var categoriesResult = await _categoryService.GetAllByNonDeletedAndActiveAsync();
+            if(articleResult.ResultStatus==ResultStatus.Success && categoriesResult.ResultStatus == ResultStatus.Success)
+            {
+                var articleUpdateViewModel = Mapper.Map<ArticleUpdateViewModel>(articleResult.Data);
+                articleUpdateViewModel.Categories = categoriesResult.Data.Categories;
+                return View(articleUpdateViewModel);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }
