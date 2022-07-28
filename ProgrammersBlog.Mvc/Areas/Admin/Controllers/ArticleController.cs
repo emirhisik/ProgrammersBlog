@@ -57,7 +57,7 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                 var articleAddDto = Mapper.Map<ArticleAddDto>(articleAddViewModel);
                 var imageResult = await ImageHelper.Upload(articleAddViewModel.Title, articleAddViewModel.ThumbnailFile, PictureType.Post);
                 articleAddDto.Thumbnail = imageResult.Data.FullName;
-                var result = await _articleService.AddAsync(articleAddDto, LoggedInUser.UserName);
+                var result = await _articleService.AddAsync(articleAddDto, LoggedInUser.UserName, LoggedInUser.Id);
                 if (result.ResultStatus == ResultStatus.Success)
                 {
                     TempData.Add("SuccessMessage", result.Message);
@@ -66,9 +66,10 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                 else
                 {
                     ModelState.AddModelError("", result.Message);
-                    return View(articleAddViewModel);
                 }
             }
+            var categories = await _categoryService.GetAllByNonDeletedAndActiveAsync();
+            articleAddViewModel.Categories = categories.Data.Categories;
             return View(articleAddViewModel);
         }
         [HttpGet]
@@ -86,6 +87,42 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> Update(ArticleUpdateViewModel articleUpdateViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                bool isNewThumbnailUploaded = false;
+                var oldThumbnail = articleUpdateViewModel.Thumbnail;
+                if (articleUpdateViewModel.ThumbnailFile!=null)
+                {
+                    var uploadedImageResult = await ImageHelper.Upload(articleUpdateViewModel.Title, articleUpdateViewModel.ThumbnailFile, PictureType.Post);
+                    articleUpdateViewModel.Thumbnail = uploadedImageResult.ResultStatus == ResultStatus.Success ? uploadedImageResult.Data.FullName : "postImages/defaultThumbnail.jpg";
+                    if (oldThumbnail!="postImages/defaultThumbnail.jpg")
+                    {
+                        isNewThumbnailUploaded = true;
+                    }
+                }
+                var articleUpdateDto = Mapper.Map<ArticleUpdateDto>(articleUpdateViewModel);
+                var result = await _articleService.UpdateAsync(articleUpdateDto, LoggedInUser.UserName);
+                if (result.ResultStatus == ResultStatus.Success)
+                {
+                    if (isNewThumbnailUploaded)
+                    {
+                        ImageHelper.Delete(oldThumbnail);
+                    }
+                    TempData.Add("SuccessMessage", result.Message);
+                    return RedirectToAction("Index", "Article");
+                }
+                else
+                {
+                    ModelState.AddModelError("", result.Message);
+                }
+            }
+            var categories = await _categoryService.GetAllByNonDeletedAndActiveAsync();
+            articleUpdateViewModel.Categories = categories.Data.Categories;
+            return View(articleUpdateViewModel);
         }
     }
 }
