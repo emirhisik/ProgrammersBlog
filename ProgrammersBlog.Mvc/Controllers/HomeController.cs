@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ProgrammersBlog.Services.Abstract;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using ProgrammersBlog.Services.Abstract;
 
 namespace ProgrammersBlog.Mvc.Controllers
 {
@@ -16,10 +16,12 @@ namespace ProgrammersBlog.Mvc.Controllers
             _articleService = articleService;
         }
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId)
         {
-            var articleListDto = await _articleService.GetAllByNonDeletedAndActiveAsync();
-            return View(articleListDto.Data);
+            var articlesResult = await (categoryId == null
+                ? _articleService.GetAllByNonDeletedAndActiveAsync()
+                : _articleService.GetAllByCategoryAsync(categoryId.Value));
+            return View(articlesResult.Data);
         }
     }
 }
