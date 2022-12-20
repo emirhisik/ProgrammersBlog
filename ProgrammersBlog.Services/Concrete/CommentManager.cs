@@ -235,14 +235,17 @@ namespace ProgrammersBlog.Services.Concrete
 
         public async Task<IDataResult<CommentDto>> UndoDeleteAsync(int commentId, string modifiedByName)
         {
-            var comment = await UnitOfWork.Comments.GetAsync(c => c.Id == commentId);
+            var comment = await UnitOfWork.Comments.GetAsync(c => c.Id == commentId, c => c.Article);
             if (comment != null)
             {
+                var article = comment.Article;
                 comment.IsDeleted = false;
                 comment.IsActive = true;
                 comment.ModifiedByName = modifiedByName;
                 comment.ModifiedDate = DateTime.Now;
                 var deletedComment = await UnitOfWork.Comments.UpdateAsync(comment);
+                article.CommentCount = await UnitOfWork.Comments.CountAsync(c => c.ArticleId == article.Id && !c.IsDeleted);
+                await UnitOfWork.Articles.UpdateAsync(article);
                 await UnitOfWork.SaveAsync();
                 return new DataResult<CommentDto>(ResultStatus.Success, Messages.Comment.UndoDelete(deletedComment.CreatedByName), new CommentDto
                 {
