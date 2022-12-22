@@ -64,6 +64,10 @@ namespace ProgrammersBlog.Services.Utilities
             {
                 return $"{articleName} adlı makale başarıyla arşivden geri getirilmiştir.";
             }
+            public static string IncreaseViewCount(string articleName)
+            {
+                return $"{articleName} adlı makalenin okunma sayısı başarıyla arttırılmıştır.";
+            }
         }
         public static class Comment
         {
