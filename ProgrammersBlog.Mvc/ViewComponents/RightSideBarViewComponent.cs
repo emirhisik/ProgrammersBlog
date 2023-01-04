@@ -22,7 +22,7 @@ namespace ProgrammersBlog.Mvc.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var categoriesResult = await _categoryService.GetAllByNonDeletedAndActiveAsync();
-            var articlesResult = await _articleService.GetAllByViewCountAsync(isAscending: false, takeSize: 5);
+            var articlesResult = await _articleService.GetAllByViewsCountAsync(isAscending: false, takeSize: 5);
             return View(new RightSideBarViewModel
             {
                 Categories = categoriesResult.Data.Categories,

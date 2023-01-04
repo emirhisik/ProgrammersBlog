@@ -42,10 +42,10 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Models
         public DateTime EndAt { get; set; }
         [DisplayName("Maksimum Okunma Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
-        public int MaxViewCount { get; set; }
+        public int MaxViewsCount { get; set; }
         [DisplayName("Minimum Okunma Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
-        public int MinViewCount { get; set; }
+        public int MinViewsCount { get; set; }
         [DisplayName("Maksimum Yorum Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
         public int MaxCommentCount { get; set; }
