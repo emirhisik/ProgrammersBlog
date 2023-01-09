@@ -21,39 +21,39 @@ using ProgrammersBlog.Shared.Utilities.Results.Concrete;
 
 namespace ProgrammersBlog.Services.Concrete
 {
-    public class ArticleManager : ManagerBase, IArticleService
+    public class ArticleManager:ManagerBase,IArticleService
     {
         private readonly UserManager<User> _userManager;
-        public ArticleManager(IUnitOfWork unitOfWork, IMapper mapper, UserManager<User> userManager) : base(unitOfWork, mapper)
+        public ArticleManager(IUnitOfWork unitOfWork, IMapper mapper, UserManager<User> userManager):base(unitOfWork,mapper)
         {
             _userManager = userManager;
         }
 
         public async Task<IDataResult<ArticleDto>> GetAsync(int articleId)
         {
-            var article = await UnitOfWork.Articles.GetAsync(a => a.Id == articleId, a => a.User, a => a.Category);
-            if (article != null)
+            var article = await UnitOfWork.Articles.GetAsync(a => a.Id == articleId,a=>a.User,a=>a.Category);
+            if (article!=null)
             {
-                article.Comments = await UnitOfWork.Comments.GetAllAsync(c => c.ArticleId == articleId && !c.IsDeleted && c.IsActive);
-                return new DataResult<ArticleDto>(ResultStatus.Success, new ArticleDto
+                article.Comments = await UnitOfWork.Comments.GetAllAsync(c => c.ArticleId == articleId&&!c.IsDeleted&&c.IsActive);
+                return new DataResult<ArticleDto>(ResultStatus.Success,new ArticleDto
                 {
                     Article = article,
                     ResultStatus = ResultStatus.Success
                 });
             }
-            return new DataResult<ArticleDto>(ResultStatus.Error, Messages.Article.NotFound(isPlural: false), null);
+            return new DataResult<ArticleDto>(ResultStatus.Error,Messages.Article.NotFound(isPlural:false),null);
         }
 
         public async Task<IDataResult<ArticleDto>> GetByIdAsync(int articleId, bool includeCategory, bool includeComments, bool includeUser)
         {
             List<Expression<Func<Article, bool>>> predicates = new List<Expression<Func<Article, bool>>>();
             List<Expression<Func<Article, object>>> includes = new List<Expression<Func<Article, object>>>();
-            if (includeCategory) includes.Add(a => a.Category);
-            if (includeComments) includes.Add(a => a.Comments);
-            if (includeUser) includes.Add(a => a.User);
-            predicates.Add(a => a.Id == articleId);
+            if (includeCategory) includes.Add(a=>a.Category);
+            if (includeComments) includes.Add(a=>a.Comments);
+            if (includeUser) includes.Add(a=>a.User);
+            predicates.Add(a=>a.Id==articleId);
             var article = await UnitOfWork.Articles.GetAsyncV2(predicates, includes);
-            if (article == null)
+            if (article==null)
             {
                 return new DataResult<ArticleDto>(ResultStatus.Warning, Messages.General.ValidationError(), null,
                     new List<ValidationError>
@@ -87,12 +87,88 @@ namespace ProgrammersBlog.Services.Concrete
             }
         }
 
+        public async Task<IDataResult<ArticleListDto>> GetAllAsyncV2(int? categoryId, int? userId, bool? isActive, bool? isDeleted, int currentPage, int pageSize,
+            OrderByGeneral orderBy, bool isAscending, bool includeCategory, bool includeComments, bool includeUser)
+        {
+            List<Expression<Func<Article, bool>>> predicates = new List<Expression<Func<Article, bool>>>();
+            List<Expression<Func<Article, object>>> includes = new List<Expression<Func<Article, object>>>();
+
+            //Predicates
+            if (categoryId.HasValue)
+            {
+                if (!await UnitOfWork.Categories.AnyAsync(c=>c.Id==categoryId.Value))
+                {
+                    return new DataResult<ArticleListDto>(ResultStatus.Warning, Messages.General.ValidationError(), null,
+                        new List<ValidationError>
+                        {
+                            new ValidationError
+                            {
+                                PropertyName = "categoryId",
+                                Message = Messages.Category.NotFoundById(categoryId.Value)
+                            }
+                        });
+                }
+                predicates.Add(a=>a.CategoryId==categoryId.Value);
+            }
+            if (userId.HasValue)
+            {
+                if (!await _userManager.Users.AnyAsync(u=>u.Id==userId.Value))
+                {
+                    return new DataResult<ArticleListDto>(ResultStatus.Warning, Messages.General.ValidationError(), null,
+                        new List<ValidationError>
+                        {
+                            new ValidationError
+                            {
+                                PropertyName = "userId",
+                                Message = Messages.User.NotFoundById(userId.Value)
+                            }
+                        });
+                }
+                predicates.Add(a => a.UserId == userId.Value);
+            }
+            if (isActive.HasValue) predicates.Add(a=>a.IsActive==isActive.Value);
+            if (isDeleted.HasValue) predicates.Add(a => a.IsDeleted == isDeleted.Value);
+            //Includes
+            if (includeCategory) includes.Add(a => a.Category);
+            if (includeComments) includes.Add(a => a.Comments);
+            if (includeUser) includes.Add(a => a.User);
+            var articles = await UnitOfWork.Articles.GetAllAsyncV2(predicates, includes);
+
+            IOrderedEnumerable<Article> sortedArticles;
+
+            switch (orderBy)
+            {
+                case OrderByGeneral.Id:
+                    sortedArticles = isAscending ? articles.OrderBy(a => a.Id) : articles.OrderByDescending(a => a.Id);
+                    break;
+                case OrderByGeneral.Az:
+                    sortedArticles = isAscending ? articles.OrderBy(a => a.Title) : articles.OrderByDescending(a => a.Title);
+                    break;
+                // Default CreatedDate
+                default:
+                    sortedArticles = isAscending ? articles.OrderBy(a => a.CreatedDate) : articles.OrderByDescending(a => a.CreatedDate);
+                    break;
+            }
+
+            return new DataResult<ArticleListDto>(ResultStatus.Success, new ArticleListDto
+            {
+                Articles = sortedArticles.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList(),
+                CategoryId = categoryId.HasValue ? categoryId.Value : null,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                IsAscending = isAscending,
+                TotalCount = articles.Count,
+                ResultStatus = ResultStatus.Success
+            });
+
+        }
+
         public async Task<IDataResult<ArticleListDto>> GetAllAsync()
         {
             var articles = await UnitOfWork.Articles.GetAllAsync(null, a => a.User, a => a.Category);
-            if (articles.Count > -1)
+            if (articles.Count>-1)
             {
-                return new DataResult<ArticleListDto>(ResultStatus.Success, new ArticleListDto
+                return new DataResult<ArticleListDto>(ResultStatus.Success,new ArticleListDto
                 {
                     Articles = articles,
                     ResultStatus = ResultStatus.Success
@@ -104,7 +180,6 @@ namespace ProgrammersBlog.Services.Concrete
         public async Task<IDataResult<ArticleListDto>> GetAllByNonDeletedAsync()
         {
             var articles = await UnitOfWork.Articles.GetAllAsync(a => !a.IsDeleted, ar => ar.User, ar => ar.Category);
-            throw new SqlNullValueException();
             if (articles.Count > -1)
             {
                 return new DataResult<ArticleListDto>(ResultStatus.Success, new ArticleListDto
@@ -149,7 +224,7 @@ namespace ProgrammersBlog.Services.Concrete
                 }
                 return new DataResult<ArticleListDto>(ResultStatus.Error, Messages.Article.NotFound(isPlural: true), null);
             }
-            return new DataResult<ArticleListDto>(ResultStatus.Error, Messages.Category.NotFound(isPlural: false), null);
+            return new DataResult<ArticleListDto>(ResultStatus.Error, Messages.Category.NotFound(isPlural:false), null);
 
         }
 
@@ -169,13 +244,13 @@ namespace ProgrammersBlog.Services.Concrete
             return new DataResult<ArticleListDto>(ResultStatus.Error, Messages.Article.NotFound(isPlural: true), null);
         }
 
-        public async Task<IDataResult<ArticleListDto>> GetAllByViewsCountAsync(bool isAscending, int? takeSize)
+        public async Task<IDataResult<ArticleListDto>> GetAllByViewCountAsync(bool isAscending, int? takeSize)
         {
             var articles =
                 await UnitOfWork.Articles.GetAllAsync(a => a.IsActive && !a.IsDeleted, a => a.Category, a => a.User);
             var sortedArticles = isAscending
-                ? articles.OrderBy(a => a.ViewsCount)
-                : articles.OrderByDescending(a => a.ViewsCount);
+                ? articles.OrderBy(a => a.ViewCount)
+                : articles.OrderByDescending(a => a.ViewCount);
             return new DataResult<ArticleListDto>(ResultStatus.Success, new ArticleListDto
             {
                 Articles = takeSize == null ? sortedArticles.ToList() : sortedArticles.Take(takeSize.Value).ToList()
@@ -204,7 +279,7 @@ namespace ProgrammersBlog.Services.Concrete
         }
 
         public async Task<IDataResult<ArticleListDto>> GetAllByUserIdOnFilter(int userId, FilterBy filterBy, OrderBy orderBy, bool isAscending, int takeSize,
-            int categoryId, DateTime startAt, DateTime endAt, int minViewsCount, int maxViewsCount, int minCommentCount,
+            int categoryId, DateTime startAt, DateTime endAt, int minViewCount, int maxViewCount, int minCommentCount,
             int maxCommentCount)
         {
             var anyUser = await _userManager.Users.AnyAsync(u => u.Id == userId);
@@ -229,12 +304,12 @@ namespace ProgrammersBlog.Services.Concrete
                                 : userArticles.Where(a => a.CategoryId == categoryId).Take(takeSize)
                                     .OrderByDescending(a => a.Date).ToList();
                             break;
-                        case OrderBy.ViewsCount:
+                        case OrderBy.ViewCount:
                             sortedArticles = isAscending
                                 ? userArticles.Where(a => a.CategoryId == categoryId).Take(takeSize)
-                                    .OrderBy(a => a.ViewsCount).ToList()
+                                    .OrderBy(a => a.ViewCount).ToList()
                                 : userArticles.Where(a => a.CategoryId == categoryId).Take(takeSize)
-                                    .OrderByDescending(a => a.ViewsCount).ToList();
+                                    .OrderByDescending(a => a.ViewCount).ToList();
                             break;
                         case OrderBy.CommentCount:
                             sortedArticles = isAscending
@@ -250,17 +325,17 @@ namespace ProgrammersBlog.Services.Concrete
                     {
                         case OrderBy.Date:
                             sortedArticles = isAscending
-                                ? userArticles.Where(a => a.Date >= startAt && a.Date <= endAt).Take(takeSize)
+                                ? userArticles.Where(a => a.Date>=startAt&&a.Date<=endAt).Take(takeSize)
                                     .OrderBy(a => a.Date).ToList()
                                 : userArticles.Where(a => a.Date >= startAt && a.Date <= endAt).Take(takeSize)
                                     .OrderByDescending(a => a.Date).ToList();
                             break;
-                        case OrderBy.ViewsCount:
+                        case OrderBy.ViewCount:
                             sortedArticles = isAscending
                                 ? userArticles.Where(a => a.Date >= startAt && a.Date <= endAt).Take(takeSize)
-                                    .OrderBy(a => a.ViewsCount).ToList()
+                                    .OrderBy(a => a.ViewCount).ToList()
                                 : userArticles.Where(a => a.Date >= startAt && a.Date <= endAt).Take(takeSize)
-                                    .OrderByDescending(a => a.ViewsCount).ToList();
+                                    .OrderByDescending(a => a.ViewCount).ToList();
                             break;
                         case OrderBy.CommentCount:
                             sortedArticles = isAscending
@@ -271,28 +346,28 @@ namespace ProgrammersBlog.Services.Concrete
                             break;
                     }
                     break;
-                case FilterBy.ViewsCount:
+                case FilterBy.ViewCount:
                     switch (orderBy)
                     {
                         case OrderBy.Date:
                             sortedArticles = isAscending
-                                ? userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
+                                ? userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
                                     .OrderBy(a => a.Date).ToList()
-                                : userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
+                                : userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
                                     .OrderByDescending(a => a.Date).ToList();
                             break;
-                        case OrderBy.ViewsCount:
+                        case OrderBy.ViewCount:
                             sortedArticles = isAscending
-                                ? userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
-                                    .OrderBy(a => a.ViewsCount).ToList()
-                                : userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
-                                    .OrderByDescending(a => a.ViewsCount).ToList();
+                                ? userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
+                                    .OrderBy(a => a.ViewCount).ToList()
+                                : userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
+                                    .OrderByDescending(a => a.ViewCount).ToList();
                             break;
                         case OrderBy.CommentCount:
                             sortedArticles = isAscending
-                                ? userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
+                                ? userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
                                     .OrderBy(a => a.CommentCount).ToList()
-                                : userArticles.Where(a => a.ViewsCount >= minViewsCount && a.ViewsCount <= maxViewsCount).Take(takeSize)
+                                : userArticles.Where(a => a.ViewCount >= minViewCount && a.ViewCount <= maxViewCount).Take(takeSize)
                                     .OrderByDescending(a => a.CommentCount).ToList();
                             break;
                     }
@@ -311,14 +386,14 @@ namespace ProgrammersBlog.Services.Concrete
                                     .Take(takeSize)
                                     .OrderByDescending(a => a.Date).ToList();
                             break;
-                        case OrderBy.ViewsCount:
+                        case OrderBy.ViewCount:
                             sortedArticles = isAscending
                                 ? userArticles.Where(a => a.CommentCount >= minCommentCount && a.CommentCount <= maxCommentCount)
                                     .Take(takeSize)
-                                    .OrderBy(a => a.ViewsCount).ToList()
+                                    .OrderBy(a => a.ViewCount).ToList()
                                 : userArticles.Where(a => a.CommentCount >= minCommentCount && a.CommentCount <= maxCommentCount)
                                     .Take(takeSize)
-                                    .OrderByDescending(a => a.ViewsCount).ToList();
+                                    .OrderByDescending(a => a.ViewCount).ToList();
                             break;
                         case OrderBy.CommentCount:
                             sortedArticles = isAscending
@@ -382,18 +457,18 @@ namespace ProgrammersBlog.Services.Concrete
             });
         }
 
-        public async Task<IResult> IncreaseViewsCountAsync(int articleId)
+        public async Task<IResult> IncreaseViewCountAsync(int articleId)
         {
             var article = await UnitOfWork.Articles.GetAsync(a => a.Id == articleId);
-            if (article == null)
+            if (article==null)
             {
                 return new Result(ResultStatus.Error, Messages.Article.NotFound(isPlural: false));
             }
 
-            article.ViewsCount += 1;
+            article.ViewCount += 1;
             await UnitOfWork.Articles.UpdateAsync(article);
             await UnitOfWork.SaveAsync();
-            return new Result(ResultStatus.Success, Messages.Article.IncreaseViewsCount(article.Title));
+            return new Result(ResultStatus.Success, Messages.Article.IncreaseViewCount(article.Title));
         }
 
         public async Task<IResult> AddAsync(ArticleAddDto articleAddDto, string createdByName, int userId)
@@ -404,13 +479,13 @@ namespace ProgrammersBlog.Services.Concrete
             article.UserId = userId;
             await UnitOfWork.Articles.AddAsync(article);
             await UnitOfWork.SaveAsync();
-            return new Result(ResultStatus.Success, Messages.Article.Add(article.Title));
+            return new Result(ResultStatus.Success,Messages.Article.Add(article.Title));
         }
 
         public async Task<IResult> UpdateAsync(ArticleUpdateDto articleUpdateDto, string modifiedByName)
         {
             var oldArticle = await UnitOfWork.Articles.GetAsync(a => a.Id == articleUpdateDto.Id);
-            var article = Mapper.Map<ArticleUpdateDto, Article>(articleUpdateDto, oldArticle);
+            var article = Mapper.Map<ArticleUpdateDto,Article>(articleUpdateDto,oldArticle);
             article.ModifiedByName = modifiedByName;
             await UnitOfWork.Articles.UpdateAsync(article);
             await UnitOfWork.SaveAsync();
@@ -426,12 +501,12 @@ namespace ProgrammersBlog.Services.Concrete
                 article.IsDeleted = true;
                 article.IsActive = false;
                 article.ModifiedByName = modifiedByName;
-                article.ModifiedDate = DateTime.Now;
+                article.ModifiedDate=DateTime.Now;
                 await UnitOfWork.Articles.UpdateAsync(article);
                 await UnitOfWork.SaveAsync();
                 return new Result(ResultStatus.Success, Messages.Article.Delete(article.Title));
             }
-            return new Result(ResultStatus.Error, Messages.Article.NotFound(isPlural: false));
+            return new Result(ResultStatus.Error,Messages.Article.NotFound(isPlural:false));
         }
 
         public async Task<IResult> HardDeleteAsync(int articleId)
@@ -444,7 +519,7 @@ namespace ProgrammersBlog.Services.Concrete
                 await UnitOfWork.SaveAsync();
                 return new Result(ResultStatus.Success, Messages.Article.HardDelete(article.Title));
             }
-            return new Result(ResultStatus.Error, Messages.Article.NotFound(isPlural: false));
+            return new Result(ResultStatus.Error, Messages.Article.NotFound(isPlural:false));
         }
 
         public async Task<IResult> UndoDeleteAsync(int articleId, string modifiedByName)
@@ -479,7 +554,7 @@ namespace ProgrammersBlog.Services.Concrete
 
         public async Task<IDataResult<int>> CountByNonDeletedAsync()
         {
-            var articlesCount = await UnitOfWork.Articles.CountAsync(a => !a.IsDeleted);
+            var articlesCount = await UnitOfWork.Articles.CountAsync(a=>!a.IsDeleted);
             if (articlesCount > -1)
             {
                 return new DataResult<int>(ResultStatus.Success, articlesCount);

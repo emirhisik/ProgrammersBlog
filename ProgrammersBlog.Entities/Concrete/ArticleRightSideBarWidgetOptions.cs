@@ -42,10 +42,10 @@ namespace ProgrammersBlog.Entities.Concrete
         public DateTime EndAt { get; set; }
         [DisplayName("Maksimum Okunma Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
-        public int MaxViewsCount { get; set; }
+        public int MaxViewCount { get; set; }
         [DisplayName("Minimum Okunma Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
-        public int MinViewsCount { get; set; }
+        public int MinViewCount { get; set; }
         [DisplayName("Maksimum Yorum Sayısı")]
         [Required(ErrorMessage = "{0} alanı zorunludur.")]
         public int MaxCommentCount { get; set; }

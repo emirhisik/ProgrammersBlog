@@ -93,7 +93,7 @@ namespace ProgrammersBlog.Data.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ViewsCount")
+                    b.Property<int>("ViewCount")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -125,7 +125,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "C# 9.0 ve .NET 5 Yenilikleri",
                             UserId = 1,
-                            ViewsCount = 100
+                            ViewCount = 100
                         },
                         new
                         {
@@ -147,7 +147,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "C++ 11 ve 19 Yenilikleri",
                             UserId = 1,
-                            ViewsCount = 295
+                            ViewCount = 295
                         },
                         new
                         {
@@ -169,7 +169,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "JavaScript ES2019 ve ES2020 Yenilikleri",
                             UserId = 1,
-                            ViewsCount = 12
+                            ViewCount = 12
                         },
                         new
                         {
@@ -191,7 +191,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Typescript 4.1",
                             UserId = 1,
-                            ViewsCount = 666
+                            ViewCount = 666
                         },
                         new
                         {
@@ -213,7 +213,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Java ve Android'in Geleceği | 2021",
                             UserId = 1,
-                            ViewsCount = 3225
+                            ViewCount = 3225
                         },
                         new
                         {
@@ -235,7 +235,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Python ile Veri Madenciliği | 2021",
                             UserId = 1,
-                            ViewsCount = 9999
+                            ViewCount = 9999
                         },
                         new
                         {
@@ -257,7 +257,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Php Laravel Başlangıç Rehberi | API",
                             UserId = 1,
-                            ViewsCount = 4818
+                            ViewCount = 4818
                         },
                         new
                         {
@@ -279,7 +279,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Kotlin ile Mobil Programlama",
                             UserId = 1,
-                            ViewsCount = 750
+                            ViewCount = 750
                         },
                         new
                         {
@@ -301,7 +301,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Swift ile IOS Programlama",
                             UserId = 1,
-                            ViewsCount = 14900
+                            ViewCount = 14900
                         },
                         new
                         {
@@ -323,7 +323,7 @@ namespace ProgrammersBlog.Data.Migrations
                             Thumbnail = "postImages/defaultThumbnail.jpg",
                             Title = "Ruby on Rails ile AirBnb Klon Kodlayalım",
                             UserId = 1,
-                            ViewsCount = 26777
+                            ViewCount = 26777
                         });
                 });
 

@@ -3,13 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ProgrammersBlog.Services.Abstract;
-using ProgrammersBlog.Shared.Utilities.Results.ComplexTypes;
-using ProgrammersBlog.Entities.Dtos;
-using ProgrammersBlog.Mvc.Models;
+using Microsoft.Extensions.Options;
 using ProgrammersBlog.Entities.ComplexTypes;
 using ProgrammersBlog.Entities.Concrete;
-using Microsoft.Extensions.Options;
+using ProgrammersBlog.Mvc.Attributes;
+using ProgrammersBlog.Mvc.Models;
+using ProgrammersBlog.Services.Abstract;
+using ProgrammersBlog.Shared.Utilities.Results.ComplexTypes;
 
 namespace ProgrammersBlog.Mvc.Controllers
 {
@@ -24,7 +24,7 @@ namespace ProgrammersBlog.Mvc.Controllers
             _articleRightSideBarWidgetOptions = articleRightSideBarWidgetOptions.Value;
         }
         [HttpGet]
-        public async Task<IActionResult> Search(string keyword, int currentPage=1, int pageSize=5, bool isAscending=false)
+        public async Task<IActionResult> Search(string keyword, int currentPage=1,int pageSize=5, bool isAscending=false)
         {
             var searchResult = await _articleService.SearchAsync(keyword, currentPage, pageSize, isAscending);
             if (searchResult.ResultStatus == ResultStatus.Success)
@@ -36,13 +36,16 @@ namespace ProgrammersBlog.Mvc.Controllers
             return NotFound();
         }
         [HttpGet]
+        [ViewCountFilter]
         public async Task<IActionResult> Detail(int articleId)
         {
             var articleResult = await _articleService.GetAsync(articleId);
             if (articleResult.ResultStatus==ResultStatus.Success)
             {
-                var userArticles = await _articleService.GetAllByUserIdOnFilter(articleResult.Data.Article.UserId, _articleRightSideBarWidgetOptions.FilterBy, _articleRightSideBarWidgetOptions.OrderBy, _articleRightSideBarWidgetOptions.IsAscending, _articleRightSideBarWidgetOptions.TakeSize, _articleRightSideBarWidgetOptions.CategoryId, _articleRightSideBarWidgetOptions.StartAt, _articleRightSideBarWidgetOptions.EndAt, _articleRightSideBarWidgetOptions.MinViewsCount, _articleRightSideBarWidgetOptions.MaxViewsCount, _articleRightSideBarWidgetOptions.MinCommentCount, _articleRightSideBarWidgetOptions.MaxCommentCount);
-                await _articleService.IncreaseViewsCountAsync(articleId);
+                var userArticles = await _articleService.GetAllByUserIdOnFilter(articleResult.Data.Article.UserId,
+                    _articleRightSideBarWidgetOptions.FilterBy, _articleRightSideBarWidgetOptions.OrderBy, _articleRightSideBarWidgetOptions.IsAscending, _articleRightSideBarWidgetOptions.TakeSize, _articleRightSideBarWidgetOptions.CategoryId, _articleRightSideBarWidgetOptions.StartAt,
+                    _articleRightSideBarWidgetOptions.EndAt, _articleRightSideBarWidgetOptions.MinViewCount, _articleRightSideBarWidgetOptions.MaxViewCount, _articleRightSideBarWidgetOptions.MinCommentCount, _articleRightSideBarWidgetOptions.MaxCommentCount);
+                //await _articleService.IncreaseViewCountAsync(articleId);
                 return View(new ArticleDetailViewModel
                 {
                     ArticleDto = articleResult.Data,

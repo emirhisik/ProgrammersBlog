@@ -111,7 +111,7 @@ namespace ProgrammersBlog.Data.Migrations
                     Content = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
                     Thumbnail = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ViewsCount = table.Column<int>(type: "int", nullable: false),
+                    ViewCount = table.Column<int>(type: "int", nullable: false),
                     CommentCount = table.Column<int>(type: "int", nullable: false),
                     SeoAuthor = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     SeoDescription = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
@@ -312,7 +312,7 @@ namespace ProgrammersBlog.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Articles",
-                columns: new[] { "Id", "CategoryId", "CommentCount", "Content", "CreatedByName", "CreatedDate", "Date", "IsActive", "IsDeleted", "ModifiedByName", "ModifiedDate", "Note", "SeoAuthor", "SeoDescription", "SeoTags", "Thumbnail", "Title", "UserId", "ViewsCount" },
+                columns: new[] { "Id", "CategoryId", "CommentCount", "Content", "CreatedByName", "CreatedDate", "Date", "IsActive", "IsDeleted", "ModifiedByName", "ModifiedDate", "Note", "SeoAuthor", "SeoDescription", "SeoTags", "Thumbnail", "Title", "UserId", "ViewCount" },
                 values: new object[,]
                 {
                     { 1, 1, 0, "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir. Lorem Ipsum, adı bilinmeyen bir matbaacının bir hurufat numune kitabı oluşturmak üzere bir yazı galerisini alarak karıştırdığı 1500'lerden beri endüstri standardı sahte metinler olarak kullanılmıştır. Beşyüz yıl boyunca varlığını sürdürmekle kalmamış, aynı zamanda pek değişmeden elektronik dizgiye de sıçramıştır. 1960'larda Lorem Ipsum pasajları da içeren Letraset yapraklarının yayınlanması ile ve yakın zamanda Aldus PageMaker gibi Lorem Ipsum sürümleri içeren masaüstü yayıncılık yazılımları ile popüler olmuştur.", "InitialCreate", new DateTime(2020, 12, 29, 12, 54, 55, 233, DateTimeKind.Local).AddTicks(8905), new DateTime(2020, 12, 29, 12, 54, 55, 233, DateTimeKind.Local).AddTicks(7372), true, false, "InitialCreate", new DateTime(2020, 12, 29, 12, 54, 55, 233, DateTimeKind.Local).AddTicks(9705), "C# 9.0 ve .NET 5 Yenilikleri", "Alper Tunga", "C# 9.0 ve .NET 5 Yenilikleri", "C#, C# 9, .NET5, .NET Framework, .NET Core", "postImages/defaultThumbnail.jpg", "C# 9.0 ve .NET 5 Yenilikleri", 1, 100 },

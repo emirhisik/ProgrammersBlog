@@ -153,8 +153,8 @@ namespace ProgrammersBlog.Mvc.Areas.Admin.Controllers
                     x.IsAscending = articleRightSideBarWidgetOptionsViewModel.IsAscending;
                     x.StartAt = articleRightSideBarWidgetOptionsViewModel.StartAt;
                     x.EndAt = articleRightSideBarWidgetOptionsViewModel.EndAt;
-                    x.MaxViewsCount = articleRightSideBarWidgetOptionsViewModel.MaxViewsCount;
-                    x.MinViewsCount = articleRightSideBarWidgetOptionsViewModel.MinViewsCount;
+                    x.MaxViewCount = articleRightSideBarWidgetOptionsViewModel.MaxViewsCount;
+                    x.MinViewCount = articleRightSideBarWidgetOptionsViewModel.MinViewsCount;
                     x.MaxCommentCount = articleRightSideBarWidgetOptionsViewModel.MaxCommentCount;
                     x.MinCommentCount = articleRightSideBarWidgetOptionsViewModel.MinCommentCount;
                 });

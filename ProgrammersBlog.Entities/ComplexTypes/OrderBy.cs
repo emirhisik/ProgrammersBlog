@@ -13,7 +13,7 @@ namespace ProgrammersBlog.Entities.ComplexTypes
         [Display(Name = "Tarih")]
         Date = 0,
         [Display(Name = "Okunma Sayısı")]
-        ViewsCount = 1,
+        ViewCount = 1,
         [Display(Name = "Yorum Sayısı")]
         CommentCount = 2
     }

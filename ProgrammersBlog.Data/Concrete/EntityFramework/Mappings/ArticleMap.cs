@@ -26,7 +26,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
             builder.Property(a => a.SeoDescription).IsRequired();
             builder.Property(a => a.SeoTags).IsRequired();
             builder.Property(a => a.SeoTags).HasMaxLength(70);
-            builder.Property(a => a.ViewsCount).IsRequired();
+            builder.Property(a => a.ViewCount).IsRequired();
             builder.Property(a => a.CommentCount).IsRequired();
             builder.Property(a => a.Thumbnail).IsRequired();
             builder.Property(a => a.Thumbnail).HasMaxLength(250);
@@ -64,7 +64,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "C# 9.0 ve .NET 5 Yenilikleri",
                     UserId = 1,
-                    ViewsCount = 100,
+                    ViewCount = 100,
                     CommentCount = 0
                 },
                 new Article
@@ -87,7 +87,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "C++ 11 ve 19 Yenilikleri",
                     UserId = 1,
-                    ViewsCount = 295,
+                    ViewCount = 295,
                     CommentCount = 0
                 },
                 new Article
@@ -110,7 +110,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "JavaScript ES2019 ve ES2020 Yenilikleri",
                     UserId = 1,
-                    ViewsCount = 12,
+                    ViewCount = 12,
                     CommentCount = 0
                 }
                 ,
@@ -134,7 +134,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "Typescript 4.1 Yenilikleri",
                     UserId = 1,
-                    ViewsCount = 666,
+                    ViewCount = 666,
                     CommentCount = 0
                 }
                 ,
@@ -158,7 +158,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "JAVA",
                     UserId = 1,
-                    ViewsCount = 3225,
+                    ViewCount = 3225,
                     CommentCount = 0
                 }
                 ,
@@ -182,7 +182,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "Python",
                     UserId = 1,
-                    ViewsCount = 9999,
+                    ViewCount = 9999,
                     CommentCount = 0
                 }
                 ,
@@ -206,7 +206,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "PHP",
                     UserId = 1,
-                    ViewsCount = 4818,
+                    ViewCount = 4818,
                     CommentCount = 0
                 }
                 ,
@@ -230,7 +230,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "Kotlin",
                     UserId = 1,
-                    ViewsCount = 750,
+                    ViewCount = 750,
                     CommentCount = 0
                 }
                 ,
@@ -254,7 +254,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "Swift",
                     UserId = 1,
-                    ViewsCount = 14900,
+                    ViewCount = 14900,
                     CommentCount = 0
                 }
                 ,
@@ -278,7 +278,7 @@ namespace ProgrammersBlog.Data.Concrete.EntityFramework.Mappings
                     ModifiedDate = DateTime.Now,
                     Note = "Ruby",
                     UserId = 1,
-                    ViewsCount = 26777,
+                    ViewCount = 26777,
                     CommentCount = 0
                 }
             );
